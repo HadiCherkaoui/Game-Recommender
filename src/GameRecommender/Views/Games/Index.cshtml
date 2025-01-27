@@ -1,0 +1,33 @@
+@model IEnumerable<GameRecommender.Models.Game>
+
+@{
+    ViewData["Title"] = "Games";
+}
+
+<h1>Games</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Add New Game</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Genre</th>
+            <th>Platform</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var game in Model)
+        {
+            <tr>
+                <td>@game.Title</td>
+                <td>@game.Genre</td>
+                <td>@game.Platform</td>
+                <td>@game.Price.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table> 
