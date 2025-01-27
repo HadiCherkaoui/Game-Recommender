@@ -1,8 +1,44 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mb-5">
+    <h1 class="display-4 mb-4">Can't decide what to play?</h1>
+    <p class="lead mb-4">Let us help you find the perfect game from your Steam library and get your friends to vote!</p>
+    
+    <div class="d-grid gap-3 col-lg-6 mx-auto">
+        <a href="#" class="btn btn-primary btn-lg">
+            <i class="bi bi-steam me-2"></i>Connect with Steam
+        </a>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4 text-center">
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body">
+                <i class="bi bi-steam display-4 mb-3"></i>
+                <h5 class="card-title">Connect Steam</h5>
+                <p class="card-text">Import your game library and preferences automatically from Steam</p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body">
+                <i class="bi bi-funnel display-4 mb-3"></i>
+                <h5 class="card-title">Filter Games</h5>
+                <p class="card-text">Answer a few questions to narrow down what you're in the mood for</p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body">
+                <i class="bi bi-people display-4 mb-3"></i>
+                <h5 class="card-title">Friend Voting</h5>
+                <p class="card-text">Share with friends and let them vote on which game to play</p>
+            </div>
+        </div>
+    </div>
 </div>

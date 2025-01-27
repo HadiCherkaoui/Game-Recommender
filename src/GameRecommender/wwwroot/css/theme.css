@@ -1,0 +1,133 @@
+:root {
+    /* Light theme colors */
+    --background-light: #ffffff;
+    --text-light: #1a1a1a;
+    --primary-light: #3b82f6;
+    --secondary-light: #e9ecef;
+    --border-light: #dee2e6;
+    --card-light: #ffffff;
+
+    /* Dark theme colors */
+    --background-dark: #1a1a1a;
+    --text-dark: #ffffff;
+    --primary-dark: #3b82f6;
+    --secondary-dark: #2d3238;
+    --border-dark: #373b3e;
+    --card-dark: #2d3238;
+
+    /* Transitions */
+    --transition-speed: 0.3s;
+}
+
+/* Auto detect system theme */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background: var(--background-dark);
+        --text: var(--text-dark);
+        --primary: var(--primary-dark);
+        --secondary: var(--secondary-dark);
+        --border: var(--border-dark);
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --background: var(--background-light);
+        --text: var(--text-light);
+        --primary: var(--primary-light);
+        --secondary: var(--secondary-light);
+        --border: var(--border-light);
+    }
+}
+
+body {
+    background-color: var(--background);
+    color: var(--text);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+.navbar {
+    background-color: var(--secondary) !important;
+    border-bottom: 1px solid var(--border);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+.table {
+    color: var(--text);
+}
+
+.table thead th {
+    border-bottom-color: var(--border);
+}
+
+.table td, .table th {
+    border-color: var(--border);
+}
+
+/* Add these new styles */
+.navbar-brand, .nav-link {
+    color: var(--text) !important;
+}
+
+.footer {
+    background-color: var(--secondary);
+    color: var(--text);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+    margin-top: auto;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.card {
+    background-color: var(--secondary);
+    border-color: var(--border);
+    transition: all 0.3s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 500;
+}
+
+.btn-outline-primary, .btn-outline-secondary {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--secondary);
+    color: var(--text);
+}
+
+input.form-control, select.form-control {
+    background-color: var(--background);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+input.form-control:focus, select.form-control:focus {
+    background-color: var(--background);
+    border-color: var(--primary);
+    color: var(--text);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+} 
