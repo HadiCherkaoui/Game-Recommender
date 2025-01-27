@@ -1,14 +1,32 @@
 using Microsoft.EntityFrameworkCore;
 using GameRecommender.Data;
+using GameRecommender.Services;
+using GameRecommender.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient();
+builder.Services.Configure<SteamConfig>(builder.Configuration.GetSection("Steam"));
+builder.Services.AddScoped<ISteamAuthService, SteamAuthService>();
 
 // Add database context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = "Cookies";
+    options.DefaultChallengeScheme = "Steam";
+})
+.AddCookie("Cookies")
+.AddSteam(options =>
+{
+    options.ApplicationKey = builder.Configuration["Steam:ApiKey"]!;
+    options.UserInformationEndpoint = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/";
+    options.CallbackPath = "/auth/ExternalLoginCallback";
+});
 
 var app = builder.Build();
 
@@ -16,10 +34,13 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
 
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

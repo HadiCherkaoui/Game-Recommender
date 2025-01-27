@@ -7,9 +7,12 @@
     <p class="lead mb-4">Let us help you find the perfect game from your Steam library and get your friends to vote!</p>
     
     <div class="d-grid gap-3 col-lg-6 mx-auto">
-        <a href="#" class="btn btn-primary btn-lg">
-            <i class="bi bi-steam me-2"></i>Connect with Steam
-        </a>
+        @if (!User.Identity?.IsAuthenticated == true)
+        {
+            <a href="/login" class="btn btn-primary btn-lg">
+                <i class="bi bi-steam me-2"></i>Connect with Steam
+            </a>
+        }
     </div>
 </div>
 
