@@ -41,4 +41,54 @@ __pycache__/
 env/
 venv/
 .env/
-.venv/ 
+.venv/
+
+# .NET Core
+bin/
+obj/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# IDE
+.vs/
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Docker
+*.env
+.env.local
+.env.*.local
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+msbuild.log
+msbuild.err
+msbuild.wrn
+
+# Visual Studio
+.vs/
+*.ncrunch*
+*.dotCover
+_ReSharper*/
+*.resharper
+[Tt]est[Rr]esult*
+*.sass-cache/
+
+# Secrets
+appsettings.*.json
+!appsettings.example.json 
