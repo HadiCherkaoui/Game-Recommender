@@ -1,22 +1,23 @@
-# Codebase AI
+# Game Recommender
 
-A powerful AI-powered coding assistant that helps developers write, understand, and maintain code more efficiently.
+An intelligent game recommendation system that helps users discover new games based on their preferences and playing history.
 
 ## Features
 
-- Intelligent code suggestions
-- Code analysis and explanations
-- Multi-language support
-- Easy integration with popular IDEs
-- Context-aware responses
+- Personalized game recommendations
+- Multi-platform game support (PC, Console, Mobile)
+- Genre-based filtering
+- User preference learning
+- Similar game suggestions
+- Price range filtering
 
 ## Getting Started
 
-Visit our [documentation](https://docs.codebase.ai) to get started with Codebase AI.
+The Game Recommender helps you find your next favorite game by analyzing your gaming preferences and play history. It uses advanced algorithms to suggest games you're likely to enjoy.
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+We welcome contributions! Please feel free to submit a Pull Request.
 
 ## License
 
