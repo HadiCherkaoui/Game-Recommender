@@ -91,4 +91,11 @@ _ReSharper*/
 
 # Secrets
 appsettings.*.json
-!appsettings.example.json 
+!appsettings.example.json
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3 

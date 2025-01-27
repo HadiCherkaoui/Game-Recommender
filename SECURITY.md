@@ -10,6 +10,6 @@ We release patches for security vulnerabilities. Which versions are eligible for
 
 ## Reporting a Vulnerability
 
-Please report security vulnerabilities by emailing [security@yourproject.com](mailto:security@yourproject.com).
+Please report security vulnerabilities by emailing [security@cherkaoui.ch](mailto:security@cherkaoui.ch).
 
 We will acknowledge your email within 48 hours, and will send a more detailed response within 72 hours indicating the next steps in handling your report. 

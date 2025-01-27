@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ConnectionStrings__DefaultConnection: "Data Source=gamerecommender-test.db"
 
     steps:
     - uses: actions/checkout@v3
