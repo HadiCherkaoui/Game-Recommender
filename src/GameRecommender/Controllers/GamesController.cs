@@ -9,6 +9,7 @@ using GameRecommender.Services;
 using GameRecommender.Models.ViewModels;
 using Microsoft.Extensions.Logging;
 using GameRecommender.Extensions;
+using Microsoft.AspNetCore.Http;
 
 namespace GameRecommender.Controllers;
 
@@ -156,6 +157,15 @@ public class GamesController : Controller
             return NotFound();
         }
 
+        // Set anonymous ID cookie if not authenticated
+        if (!User.Identity?.IsAuthenticated == true && 
+            !Request.Cookies.ContainsKey("AnonymousId"))
+        {
+            Response.Cookies.Append("AnonymousId", 
+                $"anon_{Guid.NewGuid():N}", 
+                new CookieOptions { IsEssential = true, Expires = DateTime.UtcNow.AddDays(1) });
+        }
+
         return View(session);
     }
 
@@ -164,19 +174,22 @@ public class GamesController : Controller
     {
         var voterId = User.Identity?.IsAuthenticated == true ? 
             User.GetSteamId() : 
-            $"anon_{Guid.NewGuid():N}";
+            Request.Cookies["AnonymousId"] ?? $"anon_{Guid.NewGuid():N}";
 
-        foreach (var rating in ratings)
+        // Create all votes at once
+        var votes = ratings.Select(rating => new GameVote
         {
-            var vote = new GameVote
-            {
-                SessionId = sessionId,
-                VoterId = voterId,
-                VoterName = voterName,
-                GameAppId = rating.Key,
-                Rating = rating.Value
-            };
+            SessionId = sessionId,
+            VoterId = voterId,
+            VoterName = voterName,
+            GameAppId = rating.Key,
+            Rating = rating.Value,
+            VotedAt = DateTime.UtcNow
+        }).ToList();
 
+        // Add all votes
+        foreach (var vote in votes)
+        {
             await _votingService.AddVoteAsync(sessionId, vote);
         }
 
@@ -191,6 +204,26 @@ public class GamesController : Controller
             return NotFound();
         }
 
+        // Set anonymous ID cookie if not authenticated
+        if (!User.Identity?.IsAuthenticated == true && 
+            !Request.Cookies.ContainsKey("AnonymousId"))
+        {
+            Response.Cookies.Append("AnonymousId", 
+                $"anon_{Guid.NewGuid():N}", 
+                new CookieOptions { IsEssential = true, Expires = DateTime.UtcNow.AddDays(1) });
+        }
+
         return View(results);
+    }
+
+    public async Task<IActionResult> VotingResultsPartial(string sessionId)
+    {
+        var results = await _votingService.GetResultsAsync(sessionId);
+        if (results == null)
+        {
+            return NotFound();
+        }
+
+        return PartialView("_VotingResultsPartial", results);
     }
 } 

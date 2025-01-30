@@ -1,24 +1,35 @@
 @model GameRecommender.Models.VotingSessionResult
+@using GameRecommender.Extensions
 
 @{
     ViewData["Title"] = "Voting Results";
+    var currentUserId = User.Identity?.IsAuthenticated == true ? 
+        User.GetSteamId() : 
+        Context.Request.Cookies["AnonymousId"];
+    var hasVoted = Model.Results.Any(r => r.VoterRatings.Any(v => v.VoterId == currentUserId));
 }
 
 <div class="container mt-4">
     <div class="card">
         <div class="card-body">
             <h2 class="card-title mb-4">Voting Results</h2>
-            <div id="sessionTimer" class="alert alert-warning mb-4" style="display: none;">
-                Session expires in: <span id="timeLeft"></span>
-            </div>
             
             <div id="resultsContainer">
                 @await Html.PartialAsync("_VotingResultsPartial", Model)
             </div>
 
             <div class="d-flex justify-content-between align-items-center mt-4">
-                <a asp-action="VotingSession" asp-route-id="@Model.SessionId" 
-                   class="btn btn-outline-primary">Back to Voting</a>
+                <div>
+                    @if (!hasVoted && !string.IsNullOrEmpty(currentUserId))
+                    {
+                        <a asp-action="VotingSession" asp-route-id="@Model.SessionId" 
+                           class="btn btn-outline-primary me-2">Back to Voting</a>
+                    }
+                    <button onclick="location.reload()" class="btn btn-outline-success">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh Results
+                    </button>
+                    <small class="text-muted ms-2">Results auto-refresh every 30 seconds</small>
+                </div>
                 <a asp-action="Index" class="btn btn-secondary">Return to Library</a>
             </div>
         </div>
@@ -26,69 +37,8 @@
 </div>
 
 @section Scripts {
-    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
     <script>
-        const sessionId = '@Model.SessionId';
-        let connection = new signalR.HubConnectionBuilder()
-            .withUrl("/votingHub")
-            .withAutomaticReconnect()
-            .build();
-
-        async function startConnection() {
-            try {
-                await connection.start();
-                console.log("SignalR Connected.");
-                await connection.invoke("JoinSession", sessionId);
-            } catch (err) {
-                console.error(err);
-                setTimeout(startConnection, 5000);
-            }
-        }
-
-        connection.on("VotesUpdated", (results) => {
-            // Update the results container with new data
-            fetch(`/Games/VotingResultsPartial?sessionId=${sessionId}`)
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('resultsContainer').innerHTML = html;
-                });
-        });
-
-        connection.on("SessionExpired", (expiredSessionId) => {
-            if (sessionId === expiredSessionId) {
-                document.getElementById('sessionTimer').innerHTML = 
-                    '<strong>Session Expired!</strong> This voting session has ended.';
-                document.getElementById('sessionTimer').style.display = 'block';
-            }
-        });
-
-        // Start the SignalR connection
-        startConnection();
-
-        // Set up the session timer
-        const expiresAt = new Date('@Model.ExpiresAt.ToString("o")');
-        
-        function updateTimer() {
-            const now = new Date();
-            const timeLeft = expiresAt - now;
-            
-            if (timeLeft <= 0) {
-                document.getElementById('sessionTimer').innerHTML = 
-                    '<strong>Session Expired!</strong> This voting session has ended.';
-                document.getElementById('sessionTimer').style.display = 'block';
-                return;
-            }
-
-            const minutes = Math.floor(timeLeft / 60000);
-            const seconds = Math.floor((timeLeft % 60000) / 1000);
-            
-            document.getElementById('timeLeft').textContent = 
-                `${minutes}m ${seconds}s`;
-            document.getElementById('sessionTimer').style.display = 'block';
-        }
-
-        // Update timer every second
-        setInterval(updateTimer, 1000);
-        updateTimer(); // Initial update
+        // Auto-refresh the page every 30 seconds
+        setTimeout(() => location.reload(), 30000);
     </script>
 } 

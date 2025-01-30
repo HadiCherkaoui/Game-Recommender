@@ -40,6 +40,7 @@ public class GameVoteResult
 
 public class VoterRating
 {
+    public string VoterId { get; set; } = string.Empty;
     public string VoterName { get; set; } = string.Empty;
     public int Rating { get; set; }
 } 

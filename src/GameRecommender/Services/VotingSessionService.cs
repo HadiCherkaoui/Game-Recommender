@@ -3,6 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.SignalR;
 using GameRecommender.Hubs;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace GameRecommender.Services;
 
@@ -66,19 +67,11 @@ public class VotingSessionService : IVotingSessionService
         var session = GetSessionAsync(sessionId);
         if (session == null || !session.IsActive) return false;
 
-        // Remove any existing vote by this user for this game
-        session.Votes.RemoveAll(v => v.VoterId == vote.VoterId && v.GameAppId == vote.GameAppId);
-        
-        // Add the new vote
+        // Add the new vote without removing any existing ones
         session.Votes.Add(vote);
         
-        // Update the cache
+        // Update the cache with the modified session
         _cache.Set(GetCacheKey(sessionId), session, _cacheOptions);
-
-        // Send real-time update to all clients in the session
-        var results = await GetResultsAsync(sessionId);
-        await _hubContext.Clients.Group(sessionId)
-            .SendAsync("VotesUpdated", results);
         
         return true;
     }
@@ -95,20 +88,29 @@ public class VotingSessionService : IVotingSessionService
             ExpiresAt = session.ExpiresAt,
             Results = session.Games.Select(game =>
             {
-                var gameVotes = session.Votes.Where(v => v.GameAppId == game.AppId).ToList();
+                // Get all votes for this game
+                var gameVotes = session.Votes
+                    .Where(v => v.GameAppId == game.AppId)
+                    .ToList();
+                
                 return new GameVoteResult
                 {
                     Game = game,
-                    AverageRating = gameVotes.Any() ? gameVotes.Average(v => v.Rating) : 0,
-                    TotalVotes = gameVotes.Count(),
-                    VoterRatings = gameVotes.Select(v => new VoterRating
-                    {
-                        VoterName = v.VoterName,
-                        Rating = v.Rating
-                    }).ToList()
+                    AverageRating = gameVotes.Any() ? Math.Round(gameVotes.Average(v => v.Rating), 1) : 0,
+                    TotalVotes = gameVotes.Count,
+                    VoterRatings = gameVotes
+                        .OrderByDescending(v => v.VotedAt)
+                        .Select(v => new VoterRating
+                        {
+                            VoterId = v.VoterId,
+                            VoterName = v.VoterName,
+                            Rating = v.Rating
+                        })
+                        .ToList()
                 };
             })
             .OrderByDescending(r => r.AverageRating)
+            .ThenByDescending(r => r.TotalVotes)
             .ToList()
         };
 

@@ -14,7 +14,7 @@ builder.Services.Configure<SteamConfig>(builder.Configuration.GetSection("Steam"
 builder.Services.AddScoped<ISteamAuthService, SteamAuthService>();
 builder.Services.AddScoped<SteamStoreService>();
 builder.Services.AddScoped<IGameRecommendationService, GameRecommendationService>();
-builder.Services.AddScoped<IVotingSessionService, VotingSessionService>();
+builder.Services.AddSingleton<IVotingSessionService, VotingSessionService>();
 builder.Services.AddMemoryCache();
 
 // Add database context
