@@ -38,11 +38,13 @@ RUN apt-get update && \
 # Create directories for data and secrets
 RUN mkdir -p /app/keys && \
     mkdir -p /app/db && \
-    mkdir -p /app/wwwroot
+    mkdir -p /app/wwwroot && \
+    mkdir -p /src/GameRecommender
 
 # Copy published files and set permissions
 COPY --from=build /app/publish .
 COPY --from=build /root/.dotnet/tools /root/.dotnet/tools
+COPY --from=build /src/GameRecommender /src/GameRecommender
 RUN chmod -R 755 /app/wwwroot && \
     chmod -R 700 /app/keys /app/db
 

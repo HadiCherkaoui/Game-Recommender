@@ -12,10 +12,6 @@ mkdir -p /app/db
 # Set proper permissions
 chmod 700 /app/db
 
-# Install EF Core tools globally
-dotnet tool install --global dotnet-ef || true
-export PATH="$PATH:/root/.dotnet/tools"
-
 # Try to update database multiple times (sometimes first attempt fails)
 max_attempts=3
 attempt=1
@@ -29,8 +25,8 @@ while [ $attempt -le $max_attempts ]; do
     fi
     
     # Run migrations with proper context
-    cd /app
-    dotnet ef database update --verbose --project GameRecommender.dll || true
+    cd /src/GameRecommender
+    dotnet ef database update --verbose || true
     
     # Check if the migration was successful by trying to access the database
     if sqlite3 /app/db/gamerecommender.db "SELECT name FROM sqlite_master WHERE type='table' AND name='SteamGameDetails';" > /dev/null 2>&1; then
@@ -48,5 +44,6 @@ if [ $attempt -gt $max_attempts ]; then
     exit 1
 fi
 
-# Start the application
+# Change back to app directory and start the application
+cd /app
 exec dotnet GameRecommender.dll 
