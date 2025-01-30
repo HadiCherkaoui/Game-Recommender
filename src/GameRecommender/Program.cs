@@ -4,6 +4,7 @@ using GameRecommender.Services;
 using GameRecommender.Config;
 using GameRecommender.Hubs;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,13 @@ builder.Services.AddScoped<SteamStoreService>();
 builder.Services.AddScoped<IGameRecommendationService, GameRecommendationService>();
 builder.Services.AddSingleton<IVotingSessionService, VotingSessionService>();
 builder.Services.AddMemoryCache();
+
+// Configure static files
+builder.Services.Configure<StaticFileOptions>(options =>
+{
+    options.ServeUnknownFileTypes = true;
+    options.DefaultContentType = "application/octet-stream";
+});
 
 // Add database context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -68,7 +76,17 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+// Configure static files with explicit options
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(app.Environment.ContentRootPath, "wwwroot")),
+    RequestPath = "",
+    ServeUnknownFileTypes = true,
+    DefaultContentType = "application/octet-stream"
+});
+
 app.UseCookiePolicy();
 app.UseRouting();
 app.UseAuthentication();
