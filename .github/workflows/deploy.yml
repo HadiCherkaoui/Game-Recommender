@@ -64,7 +64,7 @@ jobs:
       - name: Get Portainer JWT token
         id: get-token
         run: |
-          TOKEN=$(curl -s -X POST \
+          TOKEN=$(curl -k -s -X POST \
             -H "Content-Type: application/json" \
             -d '{"username": "${{ secrets.PORTAINER_USERNAME }}", "password": "${{ secrets.PORTAINER_PASSWORD }}"}' \
             "${{ secrets.PORTAINER_ENDPOINT }}/api/auth" | jq -r .jwt)
@@ -102,20 +102,20 @@ jobs:
           )
           
           # Check if stack exists
-          STACK_ID=$(curl -s \
+          STACK_ID=$(curl -k -s \
             -H "Authorization: Bearer ${{ steps.get-token.outputs.token }}" \
             "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks" | jq -r '.[] | select(.Name=="gamerecommender") | .Id')
           
           if [ -n "$STACK_ID" ]; then
             # Update existing stack
-            curl -X PUT \
+            curl -k -X PUT \
               -H "Authorization: Bearer ${{ steps.get-token.outputs.token }}" \
               -H "Content-Type: application/json" \
               -d "{\"stackFileContent\": \"$STACK_FILE\", \"prune\": true, \"pullImage\": true}" \
               "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks/$STACK_ID/update"
           else
             # Create new stack
-            curl -X POST \
+            curl -k -X POST \
               -H "Authorization: Bearer ${{ steps.get-token.outputs.token }}" \
               -H "Content-Type: application/json" \
               -d "{\"name\": \"gamerecommender\", \"stackFileContent\": \"$STACK_FILE\", \"swarmID\": \"\"}" \
