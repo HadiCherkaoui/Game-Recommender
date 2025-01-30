@@ -126,7 +126,7 @@ jobs:
                 \"prune\": true,
                 \"pullImage\": true
               }" \
-              "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks/$STACK_ID/update?method=string&endpointId=$ENDPOINT_ID"
+              "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks/$STACK_ID?endpointId=$ENDPOINT_ID&method=string"
           else
             # Create new stack
             curl -k -X POST \
