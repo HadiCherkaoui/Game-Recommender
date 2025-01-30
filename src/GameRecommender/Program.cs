@@ -51,7 +51,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.Cookie.Name = ".GameRecommender.Auth";
     options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
@@ -62,7 +62,7 @@ builder.Services.AddAuthentication(options =>
     options.UserInformationEndpoint = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/";
     options.CallbackPath = "/auth/ExternalLoginCallback";
     options.CorrelationCookie.SameSite = SameSiteMode.Lax;
-    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.None;
     options.SaveTokens = true;
 });
 
@@ -72,7 +72,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
     
     // Production static files configuration
     var wwwrootPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot");
@@ -103,7 +102,6 @@ else
     app.UseStaticFiles();
 }
 
-app.UseHttpsRedirection();
 app.UseCookiePolicy();
 app.UseRouting();
 app.UseAuthentication();

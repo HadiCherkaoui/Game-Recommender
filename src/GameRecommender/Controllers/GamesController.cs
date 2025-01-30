@@ -34,6 +34,15 @@ public class GamesController : Controller
 
     public async Task<IActionResult> Index()
     {
+        if (!User.Identity?.IsAuthenticated == true)
+        {
+            return View(new GameListViewModel
+            {
+                SteamGames = new List<SteamGame>(),
+                DebugInfo = "Not logged in"
+            });
+        }
+
         var steamId = User.GetSteamId();
         
         if (string.IsNullOrEmpty(steamId) || !ulong.TryParse(steamId, out _))
