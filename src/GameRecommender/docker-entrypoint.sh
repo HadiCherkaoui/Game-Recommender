@@ -28,8 +28,9 @@ while [ $attempt -le $max_attempts ]; do
         rm /app/db/gamerecommender.db
     fi
     
-    # Run migrations
-    dotnet ef database update --verbose || true
+    # Run migrations with proper context
+    cd /app
+    dotnet ef database update --verbose --project GameRecommender.dll || true
     
     # Check if the migration was successful by trying to access the database
     if sqlite3 /app/db/gamerecommender.db "SELECT name FROM sqlite_master WHERE type='table' AND name='SteamGameDetails';" > /dev/null 2>&1; then
