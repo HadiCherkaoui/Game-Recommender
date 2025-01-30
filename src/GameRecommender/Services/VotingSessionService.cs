@@ -8,8 +8,8 @@ namespace GameRecommender.Services;
 
 public interface IVotingSessionService
 {
-    Task<VotingSession> CreateSessionAsync(string creatorId, List<SteamGame> games);
-    Task<VotingSession?> GetSessionAsync(string sessionId);
+    VotingSession CreateSessionAsync(string creatorId, List<SteamGame> games);
+    VotingSession? GetSessionAsync(string sessionId);
     Task<bool> AddVoteAsync(string sessionId, GameVote vote);
     Task<VotingSessionResult> GetResultsAsync(string sessionId);
     Task CleanupExpiredSessionsAsync();
@@ -41,7 +41,7 @@ public class VotingSessionService : IVotingSessionService
         }
     }
 
-    public async Task<VotingSession> CreateSessionAsync(string creatorId, List<SteamGame> games)
+    public VotingSession CreateSessionAsync(string creatorId, List<SteamGame> games)
     {
         var session = new VotingSession
         {
@@ -55,10 +55,10 @@ public class VotingSessionService : IVotingSessionService
         return session;
     }
 
-    public Task<VotingSession?> GetSessionAsync(string sessionId)
+    public VotingSession? GetSessionAsync(string sessionId)
     {
         _cache.TryGetValue(GetCacheKey(sessionId), out VotingSession? session);
-        return Task.FromResult(session);
+        return session;
     }
 
     public async Task<bool> AddVoteAsync(string sessionId, GameVote vote)
@@ -92,6 +92,7 @@ public class VotingSessionService : IVotingSessionService
         var results = new VotingSessionResult
         {
             SessionId = sessionId,
+            ExpiresAt = session.ExpiresAt,
             Results = session.Games.Select(game =>
             {
                 var gameVotes = session.Votes.Where(v => v.GameAppId == game.AppId).ToList();

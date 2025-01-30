@@ -26,6 +26,7 @@ public class GameVote
 public class VotingSessionResult
 {
     public string SessionId { get; set; } = string.Empty;
+    public DateTime ExpiresAt { get; set; }
     public List<GameVoteResult> Results { get; set; } = new();
 }
 

@@ -142,14 +142,14 @@ public class GamesController : Controller
         var allGames = await _steamAuth.GetUserGamesAsync(steamId);
         var gamesForVoting = allGames.Where(g => selectedGames.Contains(g.AppId)).ToList();
         
-        var session = await _votingService.CreateSessionAsync(steamId, gamesForVoting);
+        var session = _votingService.CreateSessionAsync(steamId, gamesForVoting);
         
         return RedirectToAction("VotingSession", new { id = session.Id });
     }
 
     public async Task<IActionResult> VotingSession(string id)
     {
-        var session = await _votingService.GetSessionAsync(id);
+        var session = _votingService.GetSessionAsync(id);
         if (session == null)
         {
             return NotFound();
