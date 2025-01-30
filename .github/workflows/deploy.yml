@@ -129,10 +129,9 @@ jobs:
               -d "{
                 \"name\": \"gamerecommender\",
                 \"stackFileContent\": $(echo "$STACK_CONTENT" | jq -R -s .),
-                \"endpointId\": $ENDPOINT_ID,
-                \"type\": 2
+                \"endpointId\": $ENDPOINT_ID
               }" \
-              "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks?method=string"
+              "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks?method=string&type=2"
           fi
 
       - name: Cleanup WireGuard
