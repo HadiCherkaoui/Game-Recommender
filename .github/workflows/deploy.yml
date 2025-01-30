@@ -90,7 +90,7 @@ jobs:
               environment:
                 - ASPNETCORE_ENVIRONMENT=Production
                 - ASPNETCORE_URLS=http://+:2002
-                - ConnectionStrings__DefaultConnection=Data Source=gamerecommender.db
+                - ConnectionStrings__DefaultConnection=Data Source=/app/gamerecommender.db
                 - Steam__ApiKey=${{ secrets.STEAM_API_KEY }}
               ports:
                 - "2002:2002"
