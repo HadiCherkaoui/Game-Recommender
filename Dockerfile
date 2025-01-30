@@ -40,7 +40,11 @@ ENV DataProtection__Path=/app/keys
 ENV DataProtection__ApplicationName=GameRecommender
 ENV ConnectionStrings__DefaultConnection="Data Source=/app/db/gamerecommender.db"
 
+# Copy and set up the startup script
+COPY ["src/GameRecommender/docker-entrypoint.sh", "/app/"]
+RUN chmod +x /app/docker-entrypoint.sh
+
 # Expose port
 EXPOSE 2002
 
-ENTRYPOINT ["dotnet", "GameRecommender.dll"] 
+ENTRYPOINT ["/app/docker-entrypoint.sh"] 
