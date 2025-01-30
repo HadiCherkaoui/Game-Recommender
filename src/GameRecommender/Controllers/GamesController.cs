@@ -131,7 +131,6 @@ public class GamesController : Controller
         return View(recommendations);
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateVotingSession(List<int> selectedGames)
     {
