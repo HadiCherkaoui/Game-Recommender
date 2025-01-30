@@ -72,7 +72,8 @@ jobs:
 
       - name: Deploy to Portainer
         run: |
-          STACK_FILE=$(cat << 'EOF'
+          # Create stack file content
+          STACK_CONTENT=$(cat << 'EOF'
           version: '3.8'
           
           services:
@@ -101,6 +102,9 @@ jobs:
           EOF
           )
           
+          # Get endpoint ID (usually 1 for the local endpoint)
+          ENDPOINT_ID=1
+          
           # Check if stack exists
           STACK_ID=$(curl -k -s \
             -H "Authorization: Bearer ${{ steps.get-token.outputs.token }}" \
@@ -111,14 +115,25 @@ jobs:
             curl -k -X PUT \
               -H "Authorization: Bearer ${{ steps.get-token.outputs.token }}" \
               -H "Content-Type: application/json" \
-              -d "{\"stackFileContent\": \"$STACK_FILE\", \"prune\": true, \"pullImage\": true}" \
-              "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks/$STACK_ID/update"
+              -d "{
+                \"stackFileContent\": $(echo "$STACK_CONTENT" | jq -R -s .),
+                \"prune\": true,
+                \"pullImage\": true,
+                \"method\": \"string\"
+              }" \
+              "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks/$STACK_ID/update?endpointId=$ENDPOINT_ID"
           else
             # Create new stack
             curl -k -X POST \
               -H "Authorization: Bearer ${{ steps.get-token.outputs.token }}" \
               -H "Content-Type: application/json" \
-              -d "{\"name\": \"gamerecommender\", \"stackFileContent\": \"$STACK_FILE\", \"swarmID\": \"\"}" \
+              -d "{
+                \"name\": \"gamerecommender\",
+                \"stackFileContent\": $(echo "$STACK_CONTENT" | jq -R -s .),
+                \"endpointId\": $ENDPOINT_ID,
+                \"method\": \"string\",
+                \"type\": 2
+              }" \
               "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks"
           fi
 
