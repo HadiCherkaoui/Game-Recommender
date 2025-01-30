@@ -102,8 +102,12 @@ jobs:
           EOF
           )
           
-          # Get endpoint ID (usually 1 for the local endpoint)
-          ENDPOINT_ID=1
+          # Get the endpoint ID from Portainer
+          ENDPOINT_ID=$(curl -k -s \
+            -H "Authorization: Bearer ${{ steps.get-token.outputs.token }}" \
+            "${{ secrets.PORTAINER_ENDPOINT }}/api/endpoints" | jq -r '.[0].Id')
+          
+          echo "Using Endpoint ID: $ENDPOINT_ID"
           
           # Check if stack exists
           STACK_ID=$(curl -k -s \
