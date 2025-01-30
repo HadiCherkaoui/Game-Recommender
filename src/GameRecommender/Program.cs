@@ -72,40 +72,45 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    
-    // Production static files configuration
-    var wwwrootPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot");
-    Console.WriteLine($"wwwroot path: {wwwrootPath}");
-    Console.WriteLine($"Directory exists: {Directory.Exists(wwwrootPath)}");
-    if (Directory.Exists(wwwrootPath))
-    {
-        foreach (var file in Directory.GetFiles(wwwrootPath, "*.*", SearchOption.AllDirectories))
-        {
-            Console.WriteLine($"Found file: {file}");
-        }
-    }
-    
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(wwwrootPath),
-        RequestPath = "",
-        OnPrepareResponse = ctx =>
-        {
-            Console.WriteLine($"Serving static file: {ctx.File.PhysicalPath}");
-            ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
-            ctx.Context.Response.Headers.Append("Expires", "-1");
-        }
-    });
 }
-else
+
+// Configure static files with explicit options
+app.UseStaticFiles(new StaticFileOptions
 {
-    app.UseStaticFiles();
-}
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(app.Environment.ContentRootPath, "wwwroot")),
+    RequestPath = "",
+    OnPrepareResponse = ctx =>
+    {
+        // Add proper CORS headers for the domain
+        ctx.Context.Response.Headers.Append(
+            "Access-Control-Allow-Origin", "https://app.cherkaoui.ch");
+        
+        // Set proper content types for common files
+        var path = ctx.File.PhysicalPath.ToLower();
+        if (path.EndsWith(".css"))
+            ctx.Context.Response.ContentType = "text/css";
+        else if (path.EndsWith(".js"))
+            ctx.Context.Response.ContentType = "application/javascript";
+        
+        // Disable caching for now
+        ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
+        ctx.Context.Response.Headers.Append("Expires", "-1");
+    }
+});
 
 app.UseCookiePolicy();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Configure forwarded headers
+app.Use((context, next) =>
+{
+    context.Request.Scheme = "https";
+    context.Request.Host = new HostString("app.cherkaoui.ch");
+    return next();
+});
 
 app.MapControllerRoute(
     name: "default",
