@@ -90,10 +90,13 @@ jobs:
               environment:
                 - ASPNETCORE_ENVIRONMENT=Production
                 - ASPNETCORE_URLS=http://+:2002
-                - ConnectionStrings__DefaultConnection=Data Source=/data/gamerecommender.db
+                - ConnectionStrings__DefaultConnection=Data Source=gamerecommender.db
                 - Steam__ApiKey=${{ secrets.STEAM_API_KEY }}
+                - DataProtection__Path=/data/keys
+                - DataProtection__ApplicationName=GameRecommender
               volumes:
                 - gamerecommender_data:/data
+                - gamerecommender_keys:/root/.aspnet/DataProtection-Keys
               ports:
                 - "2002:2002"
               restart: unless-stopped
@@ -102,6 +105,8 @@ jobs:
           
           volumes:
             gamerecommender_data:
+              driver: local
+            gamerecommender_keys:
               driver: local
           
           networks:
