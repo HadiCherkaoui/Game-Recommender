@@ -73,20 +73,37 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+    
+    // Production static files configuration
+    var wwwrootPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+    Console.WriteLine($"wwwroot path: {wwwrootPath}");
+    Console.WriteLine($"Directory exists: {Directory.Exists(wwwrootPath)}");
+    if (Directory.Exists(wwwrootPath))
+    {
+        foreach (var file in Directory.GetFiles(wwwrootPath, "*.*", SearchOption.AllDirectories))
+        {
+            Console.WriteLine($"Found file: {file}");
+        }
+    }
+    
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(wwwrootPath),
+        RequestPath = "",
+        OnPrepareResponse = ctx =>
+        {
+            Console.WriteLine($"Serving static file: {ctx.File.PhysicalPath}");
+            ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
+            ctx.Context.Response.Headers.Append("Expires", "-1");
+        }
+    });
+}
+else
+{
+    app.UseStaticFiles();
 }
 
 app.UseHttpsRedirection();
-
-// Configure static files with explicit options
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(app.Environment.ContentRootPath, "wwwroot")),
-    RequestPath = "",
-    ServeUnknownFileTypes = true,
-    DefaultContentType = "application/octet-stream"
-});
-
 app.UseCookiePolicy();
 app.UseRouting();
 app.UseAuthentication();
