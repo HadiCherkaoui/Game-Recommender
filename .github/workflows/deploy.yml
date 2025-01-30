@@ -1,0 +1,100 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,format=long
+            type=ref,event=branch
+            type=ref,event=tag
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Install WireGuard
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wireguard
+
+      - name: Setup WireGuard
+        run: |
+          echo "${{ secrets.WIREGUARD_CONF }}" | sudo tee /etc/wireguard/wg0.conf > /dev/null
+          sudo chmod 600 /etc/wireguard/wg0.conf
+          sudo wg-quick up wg0
+
+      - name: Deploy to Portainer
+        uses: portainer/portainer-deploy@v1
+        with:
+          endpoint: ${{ secrets.PORTAINER_ENDPOINT }}
+          username: ${{ secrets.PORTAINER_USERNAME }}
+          password: ${{ secrets.PORTAINER_PASSWORD }}
+          stack_name: gamerecommender
+          stack_definition: |
+            version: '3.8'
+            
+            services:
+              gamerecommender:
+                image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+                environment:
+                  - ASPNETCORE_ENVIRONMENT=Production
+                  - ASPNETCORE_URLS=http://+:2002
+                  - ConnectionStrings__DefaultConnection=Data Source=/data/gamerecommender.db
+                  - Steam__ApiKey=${{ secrets.STEAM_API_KEY }}
+                volumes:
+                  - gamerecommender_data:/data
+                ports:
+                  - "2002:2002"
+                restart: unless-stopped
+                networks:
+                  - gamerecommender_net
+            
+            volumes:
+              gamerecommender_data:
+                driver: local
+            
+            networks:
+              gamerecommender_net:
+                driver: bridge
+
+      - name: Cleanup WireGuard
+        if: always()
+        run: sudo wg-quick down wg0 

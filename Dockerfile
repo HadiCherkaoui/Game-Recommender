@@ -1,21 +1,20 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-RUN mkdir /data
-EXPOSE 2002
-
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
+
+# Copy csproj and restore dependencies
 COPY ["src/GameRecommender/GameRecommender.csproj", "GameRecommender/"]
 RUN dotnet restore "GameRecommender/GameRecommender.csproj"
-COPY . .
-WORKDIR "/src/GameRecommender"
-RUN dotnet build "GameRecommender.csproj" -c Release -o /app/build
 
-FROM build AS publish
-RUN dotnet publish "GameRecommender.csproj" -c Release -o /app/publish
+# Copy the rest of the code
+COPY ["src/GameRecommender/", "GameRecommender/"]
 
-FROM base AS final
+# Build and publish
+RUN dotnet publish "GameRecommender/GameRecommender.csproj" -c Release -o /app/publish
+
+# Build runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
 WORKDIR /app
-COPY --from=publish /app/publish .
-VOLUME ["/data"]
+COPY --from=build /app/publish .
+EXPOSE 2002
+
 ENTRYPOINT ["dotnet", "GameRecommender.dll"] 
