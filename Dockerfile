@@ -23,6 +23,9 @@ RUN ls -la /app/publish/wwwroot || echo "wwwroot not found in publish output"
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 
+# Install SQLite and EF tools dependencies
+RUN apt-get update && apt-get install -y sqlite3 && rm -rf /var/lib/apt/lists/*
+
 # Create directories for data and secrets
 RUN mkdir -p /app/keys && \
     mkdir -p /app/db && \
