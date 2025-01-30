@@ -61,39 +61,66 @@ jobs:
           sudo chmod 600 /etc/wireguard/wg0.conf
           sudo wg-quick up wg0
 
+      - name: Get Portainer JWT token
+        id: get-token
+        run: |
+          TOKEN=$(curl -s -X POST \
+            -H "Content-Type: application/json" \
+            -d '{"username": "${{ secrets.PORTAINER_USERNAME }}", "password": "${{ secrets.PORTAINER_PASSWORD }}"}' \
+            "${{ secrets.PORTAINER_ENDPOINT }}/api/auth" | jq -r .jwt)
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
       - name: Deploy to Portainer
-        uses: portainer/portainer-deploy@v1
-        with:
-          endpoint: ${{ secrets.PORTAINER_ENDPOINT }}
-          username: ${{ secrets.PORTAINER_USERNAME }}
-          password: ${{ secrets.PORTAINER_PASSWORD }}
-          stack_name: gamerecommender
-          stack_definition: |
-            version: '3.8'
-            
-            services:
-              gamerecommender:
-                image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-                environment:
-                  - ASPNETCORE_ENVIRONMENT=Production
-                  - ASPNETCORE_URLS=http://+:2002
-                  - ConnectionStrings__DefaultConnection=Data Source=/data/gamerecommender.db
-                  - Steam__ApiKey=${{ secrets.STEAM_API_KEY }}
-                volumes:
-                  - gamerecommender_data:/data
-                ports:
-                  - "2002:2002"
-                restart: unless-stopped
-                networks:
-                  - gamerecommender_net
-            
-            volumes:
-              gamerecommender_data:
-                driver: local
-            
-            networks:
-              gamerecommender_net:
-                driver: bridge
+        run: |
+          STACK_FILE=$(cat << 'EOF'
+          version: '3.8'
+          
+          services:
+            gamerecommender:
+              image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+              environment:
+                - ASPNETCORE_ENVIRONMENT=Production
+                - ASPNETCORE_URLS=http://+:2002
+                - ConnectionStrings__DefaultConnection=Data Source=/data/gamerecommender.db
+                - Steam__ApiKey=${{ secrets.STEAM_API_KEY }}
+              volumes:
+                - gamerecommender_data:/data
+              ports:
+                - "2002:2002"
+              restart: unless-stopped
+              networks:
+                - gamerecommender_net
+          
+          volumes:
+            gamerecommender_data:
+              driver: local
+          
+          networks:
+            gamerecommender_net:
+              driver: bridge
+          EOF
+          )
+          
+          # Check if stack exists
+          STACK_ID=$(curl -s \
+            -H "Authorization: Bearer ${{ steps.get-token.outputs.token }}" \
+            "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks" | jq -r '.[] | select(.Name=="gamerecommender") | .Id')
+          
+          if [ -n "$STACK_ID" ]; then
+            # Update existing stack
+            curl -X PUT \
+              -H "Authorization: Bearer ${{ steps.get-token.outputs.token }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"stackFileContent\": \"$STACK_FILE\", \"prune\": true, \"pullImage\": true}" \
+              "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks/$STACK_ID/update"
+          else
+            # Create new stack
+            curl -X POST \
+              -H "Authorization: Bearer ${{ steps.get-token.outputs.token }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"name\": \"gamerecommender\", \"stackFileContent\": \"$STACK_FILE\", \"swarmID\": \"\"}" \
+              "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks"
+          fi
 
       - name: Cleanup WireGuard
         if: always()
