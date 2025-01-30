@@ -6,6 +6,7 @@
     --secondary-light: #e9ecef;
     --border-light: #dee2e6;
     --card-light: #ffffff;
+    --muted-light: #6c757d;
 
     /* Dark theme colors */
     --background-dark: #1a1a1a;
@@ -14,6 +15,7 @@
     --secondary-dark: #2d3238;
     --border-dark: #373b3e;
     --card-dark: #2d3238;
+    --muted-dark: #a1a8ae;
 
     /* Default theme (will be overridden by media queries) */
     --background: var(--background-light);
@@ -22,6 +24,7 @@
     --secondary: var(--secondary-light);
     --border: var(--border-light);
     --card: var(--card-light);
+    --muted: var(--muted-light);
 
     /* Transitions */
     --transition-speed: 0.3s;
@@ -36,6 +39,7 @@
         --secondary: var(--secondary-dark);
         --border: var(--border-dark);
         --card: var(--card-dark);
+        --muted: var(--muted-dark);
     }
 }
 
@@ -189,4 +193,59 @@ h1, h2, h3, h4, h5, h6, .display-4, .lead {
 .dropdown-item:hover {
     background-color: var(--background);
     color: var(--primary) !important;
+}
+
+/* Form labels and text */
+.form-label {
+    color: var(--text) !important;
+}
+
+/* Text muted */
+.text-muted {
+    color: var(--muted) !important;
+}
+
+/* List items */
+.list-unstyled li {
+    color: var(--text);
+}
+
+/* Progress bar background */
+.progress {
+    background-color: var(--secondary);
+}
+
+/* Alert text colors */
+.alert-info {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.2);
+    color: var(--text);
+}
+
+.alert-warning {
+    background-color: rgba(228, 161, 27, 0.1);
+    border-color: rgba(228, 161, 27, 0.2);
+    color: var(--text);
+}
+
+/* Input group */
+.input-group .form-control {
+    background-color: var(--background);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.input-group .form-control:focus {
+    background-color: var(--background);
+    color: var(--text);
+}
+
+.input-group .form-control[readonly] {
+    background-color: var(--secondary);
+    color: var(--text);
+}
+
+/* Small text */
+small {
+    color: var(--muted);
 } 
