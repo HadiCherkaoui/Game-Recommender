@@ -120,7 +120,7 @@ jobs:
                 \"prune\": true,
                 \"pullImage\": true
               }" \
-              "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks/$STACK_ID/update?endpointId=$ENDPOINT_ID&method=string"
+              "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks/$STACK_ID/update?method=string&endpointId=$ENDPOINT_ID"
           else
             # Create new stack
             curl -k -X POST \
@@ -128,10 +128,9 @@ jobs:
               -H "Content-Type: application/json" \
               -d "{
                 \"name\": \"gamerecommender\",
-                \"stackFileContent\": $(echo "$STACK_CONTENT" | jq -R -s .),
-                \"endpointId\": $ENDPOINT_ID
+                \"stackFileContent\": $(echo "$STACK_CONTENT" | jq -R -s .)
               }" \
-              "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks?method=string&type=2"
+              "${{ secrets.PORTAINER_ENDPOINT }}/api/stacks?method=string&type=2&endpointId=$ENDPOINT_ID"
           fi
 
       - name: Cleanup WireGuard
