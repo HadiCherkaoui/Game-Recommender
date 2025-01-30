@@ -51,7 +51,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.Cookie.Name = ".GameRecommender.Auth";
     options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() ? CookieSecurePolicy.None : CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.SlidingExpiration = true;
@@ -62,7 +62,7 @@ builder.Services.AddAuthentication(options =>
     options.UserInformationEndpoint = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/";
     options.CallbackPath = "/auth/ExternalLoginCallback";
     options.CorrelationCookie.SameSite = SameSiteMode.Lax;
-    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.None;
+    options.CorrelationCookie.SecurePolicy = builder.Environment.IsDevelopment() ? CookieSecurePolicy.None : CookieSecurePolicy.Always;
     options.SaveTokens = true;
 });
 
@@ -72,6 +72,8 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+    app.UseHttpsRedirection();
 }
 
 // Configure static files with explicit options
@@ -83,19 +85,32 @@ app.UseStaticFiles(new StaticFileOptions
     OnPrepareResponse = ctx =>
     {
         // Add proper CORS headers for the domain
-        ctx.Context.Response.Headers.Append(
-            "Access-Control-Allow-Origin", "https://app.cherkaoui.ch");
+        var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+        if (allowedOrigins?.Length > 0)
+        {
+            ctx.Context.Response.Headers.Append(
+                "Access-Control-Allow-Origin", string.Join(",", allowedOrigins));
+        }
         
         // Set proper content types for common files
-        var path = ctx.File.PhysicalPath.ToLower();
-        if (path.EndsWith(".css"))
+        var path = ctx.File.PhysicalPath?.ToLower();
+        if (path?.EndsWith(".css") == true)
             ctx.Context.Response.ContentType = "text/css";
-        else if (path.EndsWith(".js"))
+        else if (path?.EndsWith(".js") == true)
             ctx.Context.Response.ContentType = "application/javascript";
         
-        // Disable caching for now
-        ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
-        ctx.Context.Response.Headers.Append("Expires", "-1");
+        // Set proper caching for static files
+        if (!app.Environment.IsDevelopment())
+        {
+            ctx.Context.Response.Headers.Append(
+                "Cache-Control", "public,max-age=31536000");
+        }
+        else
+        {
+            // Disable caching in development
+            ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store");
+            ctx.Context.Response.Headers.Append("Expires", "-1");
+        }
     }
 });
 
