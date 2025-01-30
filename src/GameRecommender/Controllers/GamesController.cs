@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GameRecommender.Data;
 using GameRecommender.Models;
+using GameRecommender.Models.Recommendations;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using GameRecommender.Services;

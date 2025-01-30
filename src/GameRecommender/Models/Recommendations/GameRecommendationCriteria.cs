@@ -1,4 +1,4 @@
-namespace GameRecommender.Models;
+namespace GameRecommender.Models.Recommendations;
 
 public class GameRecommendationCriteria
 {

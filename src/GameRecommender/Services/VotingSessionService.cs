@@ -63,7 +63,7 @@ public class VotingSessionService : IVotingSessionService
 
     public async Task<bool> AddVoteAsync(string sessionId, GameVote vote)
     {
-        var session = await GetSessionAsync(sessionId);
+        var session = GetSessionAsync(sessionId);
         if (session == null || !session.IsActive) return false;
 
         // Remove any existing vote by this user for this game
@@ -85,7 +85,7 @@ public class VotingSessionService : IVotingSessionService
 
     public async Task<VotingSessionResult> GetResultsAsync(string sessionId)
     {
-        var session = await GetSessionAsync(sessionId);
+        var session = GetSessionAsync(sessionId);
         if (session == null) 
             return new VotingSessionResult { SessionId = sessionId };
 
@@ -100,7 +100,7 @@ public class VotingSessionService : IVotingSessionService
                 {
                     Game = game,
                     AverageRating = gameVotes.Any() ? gameVotes.Average(v => v.Rating) : 0,
-                    TotalVotes = gameVotes.Count,
+                    TotalVotes = gameVotes.Count(),
                     VoterRatings = gameVotes.Select(v => new VoterRating
                     {
                         VoterName = v.VoterName,

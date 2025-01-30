@@ -1,4 +1,5 @@
 using GameRecommender.Models;
+using GameRecommender.Models.Recommendations;
 
 namespace GameRecommender.Services;
 
@@ -18,7 +19,7 @@ public class GameRecommendationService : IGameRecommendationService
     {
         _questions = new List<GameRecommendationQuestion>
         {
-            new GameRecommendationQuestion
+            new()
             {
                 Id = "player_count",
                 Text = "How many players are you looking to play with?",
@@ -30,7 +31,7 @@ public class GameRecommendationService : IGameRecommendationService
                     new() { Text = "5+ players", Value = "5", CriteriaUpdates = new() { { "PlayerCount", "5" } } }
                 }
             },
-            new GameRecommendationQuestion
+            new()
             {
                 Id = "game_type",
                 Text = "What type of game experience are you looking for?",
@@ -44,7 +45,7 @@ public class GameRecommendationService : IGameRecommendationService
                            CriteriaUpdates = new() { { "WantMultiplayer", "true" }, { "WantCoop", "true" } } }
                 }
             },
-            new GameRecommendationQuestion
+            new()
             {
                 Id = "genre",
                 Text = "What genre interests you?",
@@ -60,7 +61,7 @@ public class GameRecommendationService : IGameRecommendationService
                            CriteriaUpdates = new() { { "PreferredGenre", "sports" } } }
                 }
             },
-            new GameRecommendationQuestion
+            new()
             {
                 Id = "mood",
                 Text = "What kind of mood are you in?",
