@@ -2,16 +2,19 @@ using Microsoft.EntityFrameworkCore;
 using GameRecommender.Data;
 using GameRecommender.Services;
 using GameRecommender.Config;
+using GameRecommender.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 builder.Services.AddHttpClient();
 builder.Services.Configure<SteamConfig>(builder.Configuration.GetSection("Steam"));
 builder.Services.AddScoped<ISteamAuthService, SteamAuthService>();
 builder.Services.AddScoped<SteamStoreService>();
 builder.Services.AddScoped<IGameRecommendationService, GameRecommendationService>();
+builder.Services.AddScoped<IVotingSessionService, VotingSessionService>();
 builder.Services.AddMemoryCache();
 
 // Add database context
@@ -50,5 +53,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHub<VotingHub>("/votingHub");
 
 app.Run(); 

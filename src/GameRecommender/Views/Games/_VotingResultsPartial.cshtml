@@ -1,0 +1,61 @@
+@model GameRecommender.Models.VotingSessionResult
+
+@if (Model.Results.Any())
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+        @foreach (var result in Model.Results.OrderByDescending(r => r.AverageRating))
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <img src="@result.Game.LogoUrl" class="card-img-top" alt="@result.Game.Name"
+                         style="height: 150px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">@result.Game.Name</h5>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Average Rating:</span>
+                                <span class="badge bg-primary">@result.AverageRating.ToString("F1")/10</span>
+                            </div>
+                            <div class="progress mt-2">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: @(result.AverageRating * 10)%"
+                                     aria-valuenow="@result.AverageRating" 
+                                     aria-valuemin="0" aria-valuemax="10">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <h6>Individual Votes (@result.TotalVotes):</h6>
+                            <ul class="list-unstyled">
+                                @foreach (var vote in result.VoterRatings)
+                                {
+                                    <li class="d-flex justify-content-between align-items-center">
+                                        <span>@vote.VoterName</span>
+                                        <span class="badge bg-secondary">@vote.Rating/10</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="alert alert-info mt-4">
+        <h5 class="alert-heading">Winner!</h5>
+        <p class="mb-0">
+            Based on everyone's votes, 
+            <strong>@Model.Results.OrderByDescending(r => r.AverageRating).First().Game.Name</strong> 
+            is the group's top choice with an average rating of 
+            @Model.Results.OrderByDescending(r => r.AverageRating).First().AverageRating.ToString("F1")/10.
+        </p>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        No votes have been submitted yet. Share the voting session with your friends!
+    </div>
+} 

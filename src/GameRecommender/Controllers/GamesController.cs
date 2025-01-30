@@ -16,13 +16,13 @@ public class GamesController : Controller
     private readonly ISteamAuthService _steamAuth;
     private readonly ILogger<GamesController> _logger;
     private readonly IGameRecommendationService _recommendationService;
-    private readonly IVotingService _votingService;
+    private readonly IVotingSessionService _votingService;
 
     public GamesController(
         ISteamAuthService steamAuth, 
         ILogger<GamesController> logger,
         IGameRecommendationService recommendationService,
-        IVotingService votingService)
+        IVotingSessionService votingService)
     {
         _steamAuth = steamAuth;
         _logger = logger;
@@ -110,15 +110,15 @@ public class GamesController : Controller
 
         var criteria = new GameRecommendationCriteria
         {
-            PlayerCount = TempData["criteria_PlayerCount"] != null ? 
-                int.Parse(TempData["criteria_PlayerCount"].ToString()) : null,
-            WantMultiplayer = TempData["criteria_WantMultiplayer"] != null ? 
-                bool.Parse(TempData["criteria_WantMultiplayer"].ToString()) : null,
-            WantCoop = TempData["criteria_WantCoop"] != null ? 
-                bool.Parse(TempData["criteria_WantCoop"].ToString()) : null,
+            PlayerCount = TempData["criteria_PlayerCount"]?.ToString() is string pc && int.TryParse(pc, out var count) 
+                ? count : null,
+            WantMultiplayer = TempData["criteria_WantMultiplayer"]?.ToString() is string mp && bool.TryParse(mp, out var multi) 
+                ? multi : null,
+            WantCoop = TempData["criteria_WantCoop"]?.ToString() is string coop && bool.TryParse(coop, out var cp) 
+                ? cp : null,
             PreferredGenre = TempData["criteria_PreferredGenre"]?.ToString(),
-            WantStoryRich = TempData["criteria_WantStoryRich"] != null ? 
-                bool.Parse(TempData["criteria_WantStoryRich"].ToString()) : null,
+            WantStoryRich = TempData["criteria_WantStoryRich"]?.ToString() is string sr && bool.TryParse(sr, out var story) 
+                ? story : null,
             GameMood = TempData["criteria_GameMood"]?.ToString()
         };
 
