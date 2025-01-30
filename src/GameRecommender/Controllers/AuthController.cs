@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using GameRecommender.Services;
 using System.Security.Claims;
+using GameRecommender.Models;
 
 namespace GameRecommender.Controllers;
 
@@ -40,31 +41,46 @@ public class AuthController : Controller
             return RedirectToAction("Index", "Home");
         }
 
-        var steamId = result.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(steamId))
+        if (result.Principal != null)
         {
-            _logger.LogError("Steam ID not found in claims");
-            return RedirectToAction("Index", "Home");
+            var steamIdClaim = result.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(steamIdClaim))
+            {
+                _logger.LogError("Steam ID not found in claims");
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Extract just the numeric SteamID from the claim URL
+            var steamId = steamIdClaim?.Replace("https://steamcommunity.com/openid/id/", "");
+            if (string.IsNullOrEmpty(steamId))
+            {
+                _logger.LogError("Invalid Steam ID format");
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Add this to get the avatar hash from Steam claims
+            var avatarHash = result.Principal?.FindFirst("urn:steam:avatar")?.Value ?? string.Empty;
+
+            // Get the existing claims and add our new ones
+            var existingClaims = result.Principal.Claims.ToList();
+            var steamUser = await _steamAuth.GetUserProfileAsync(steamId);
+            var newClaims = new List<Claim>
+            {
+                new("ProfileUrl", steamUser.ProfileUrl),
+                new("AvatarUrl", steamUser.AvatarUrl),
+                new(ClaimTypes.Name, steamUser.Name)
+            };
+
+            // Combine existing and new claims
+            var claimsIdentity = new ClaimsIdentity(existingClaims, "Cookies");
+            claimsIdentity.AddClaim(new Claim(ClaimTypes.NameIdentifier, steamId)); // Override with clean ID
+
+            // Sign in with the combined claims
+            await HttpContext.SignInAsync(
+                "Cookies",
+                new ClaimsPrincipal(claimsIdentity),
+                result.Properties);
         }
-
-        // Get the existing claims and add our new ones
-        var existingClaims = result.Principal.Claims.ToList();
-        var newClaims = new List<Claim>
-        {
-            new Claim("ProfileUrl", $"https://steamcommunity.com/profiles/{steamId}"),
-            new Claim("AvatarUrl", $"https://avatars.akamai.steamstatic.com/{steamId}.jpg")
-        };
-
-        // Combine existing and new claims
-        var identity = new ClaimsIdentity(existingClaims.Concat(newClaims), "Steam");
-        var principal = new ClaimsPrincipal(identity);
-
-        // Sign in with the combined claims
-        await HttpContext.SignInAsync("Cookies", principal, new AuthenticationProperties
-        {
-            IsPersistent = true,
-            ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
-        });
 
         return RedirectToAction("Index", "Home");
     }

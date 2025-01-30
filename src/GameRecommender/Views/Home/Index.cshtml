@@ -45,3 +45,12 @@
         </div>
     </div>
 </div>
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <div class="mt-4">
+        <a asp-controller="Games" asp-action="ImportFromSteam" class="btn btn-success">
+            <i class="bi bi-steam me-2"></i>Import Steam Library
+        </a>
+    </div>
+}

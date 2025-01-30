@@ -10,6 +10,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
 builder.Services.Configure<SteamConfig>(builder.Configuration.GetSection("Steam"));
 builder.Services.AddScoped<ISteamAuthService, SteamAuthService>();
+builder.Services.AddScoped<SteamStoreService>();
+builder.Services.AddScoped<IGameRecommendationService, GameRecommendationService>();
+builder.Services.AddMemoryCache();
 
 // Add database context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -26,6 +29,7 @@ builder.Services.AddAuthentication(options =>
     options.ApplicationKey = builder.Configuration["Steam:ApiKey"]!;
     options.UserInformationEndpoint = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/";
     options.CallbackPath = "/auth/ExternalLoginCallback";
+    options.SaveTokens = true;
 });
 
 var app = builder.Build();

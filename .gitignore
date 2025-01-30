@@ -154,4 +154,11 @@ logs/
 
 # User secrets
 *.usersecrets.json
-secrets.json 
+secrets.json
+
+# Add these to existing .gitignore
+appsettings.Development.json
+appsettings.Production.json
+*.db
+*.db-shm
+*.db-wal 

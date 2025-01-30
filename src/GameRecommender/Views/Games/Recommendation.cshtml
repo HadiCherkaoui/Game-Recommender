@@ -1,0 +1,61 @@
+@model GameRecommender.Models.GameRecommendationQuestion
+
+@{
+    ViewData["Title"] = "Game Recommendation";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card recommendation-card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">@Model.Text</h2>
+                    
+                    <div class="recommendation-options">
+                        @foreach (var answer in Model.Answers)
+                        {
+                            <form asp-action="ProcessAnswer" method="post">
+                                <input type="hidden" name="questionId" value="@Model.Id" />
+                                <input type="hidden" name="answerId" value="@answer.Value" />
+                                <button type="submit" class="btn btn-lg btn-outline-primary recommendation-button w-100">
+                                    @answer.Text
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .recommendation-card {
+        background-color: rgba(33, 37, 41, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .recommendation-options {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .recommendation-options form {
+        width: 100%;
+    }
+
+    .recommendation-button {
+        border-width: 2px;
+        font-size: 1.1rem;
+        padding: 1rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+        background-color: transparent;
+        display: block;
+    }
+    
+    .recommendation-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style> 

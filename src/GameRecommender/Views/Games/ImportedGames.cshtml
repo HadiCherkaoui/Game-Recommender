@@ -1,0 +1,26 @@
+@model List<GameRecommender.Models.SteamGame>
+
+@{
+    ViewData["Title"] = "Imported Steam Games";
+}
+
+<div class="container mt-4">
+    <h2>Your Steam Library (@Model.Count games)</h2>
+    
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-3">
+        @foreach (var game in Model)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    <img src="@game.LogoUrl" class="card-img-top" alt="@game.Name" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">@game.Name</h5>
+                        <p class="card-text">
+                            Playtime: @(game.PlaytimeMinutes / 60)h @(game.PlaytimeMinutes % 60)m
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div> 
